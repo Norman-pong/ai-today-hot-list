@@ -17,7 +17,7 @@ export default defineConfig({
   // GitHub Pages 部署在子路径下，需要设置 base
   // 格式：/仓库名/，例如 /today-hot-list/
   // 使用环境变量允许本地开发时设置为 '/'
-  base: process.env.GITHUB_PAGES === "true" ? "/today-hot-list/" : "/",
+  base: process.env.GITHUB_PAGES === "true" ? "/ai-today-hot-list/" : "/",
   plugins: [preact()],
   server: {
     port: 3000,
