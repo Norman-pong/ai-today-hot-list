@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!--
+      GitHub Pages SPA 路由支持
+      这段脚本处理直接访问带参数 URL 时的 404 问题
+    -->
+    <script type="text/javascript">
+      // 检查是否需要重定向（GitHub Pages 404 页面会带这些参数）
+      (function() {
+        const redirect = sessionStorage.getItem('github-pages-redirect');
+        if (redirect) {
+          sessionStorage.removeItem('github-pages-redirect');
+          const url = new URL(redirect, window.location.origin);
+          window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <!-- 
+      移动端适配配置：
+      - width=device-width: 视口宽度等于设备宽度
+      - initial-scale=1.0: 初始缩放比例为 1
+      - viewport-fit=cover: 支持 iPhone X+ 刘海屏安全区域
+      - maximum-scale=1, user-scalable=no: 禁止缩放（可选，根据需求调整）
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- 主题色（移动端浏览器地址栏颜色） -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <!-- 应用名称 -->
+    <meta name="apple-mobile-web-app-title" content="今日热榜" />
+    <meta name="application-name" content="今日热榜" />
+    <!-- 全屏模式（iOS） -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>今日热榜</title>
+    <!-- 
+      预连接 API 域名，加速请求 
+      注意：如果存在 CORS 问题，可能需要移除
+    -->
+    <link rel="preconnect" href="https://apis.uctb.cn" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
