@@ -1,5 +1,5 @@
 import { useState, useEffect } from "preact/hooks"
-import { getProviders, type Provider, ApiError } from "../lib/api"
+import { getProvidersByRegion, type Provider, type DataRegion, ApiError } from "../lib/api"
 import { Card, CardContent } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 import { Toast } from "./ui/toast"
@@ -11,6 +11,7 @@ import { cn } from "../lib/utils"
 interface ProviderGridProps {
   /** 选择供应商时的回调 */
   onSelectProvider: (provider: Provider) => void
+  region: DataRegion
   /** providers 加载完成后的回调（用于 URL 路由初始化） */
   onProvidersLoaded?: (providers: Provider[]) => void
 }
@@ -61,6 +62,7 @@ const providerIcons: Record<string, string> = {
  */
 export function ProviderGrid({
   onSelectProvider,
+  region,
   onProvidersLoaded,
 }: ProviderGridProps) {
   const [providers, setProviders] = useState<Provider[]>([])
@@ -74,7 +76,7 @@ export function ProviderGrid({
     setLoading(true)
     setError(null)
     try {
-      const data = await getProviders()
+      const data = await getProvidersByRegion(region)
       setProviders(data)
       // 通知父组件 providers 已加载
       onProvidersLoaded?.(data)
@@ -92,7 +94,7 @@ export function ProviderGrid({
   // 组件挂载时加载数据
   useEffect(() => {
     loadProviders()
-  }, [])
+  }, [region])
 
   /**
    * 获取供应商图标

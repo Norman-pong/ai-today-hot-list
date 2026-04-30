@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "preact/hooks"
-import { getHotList, type HotItem, ApiError } from "../lib/api"
+import { getHotListByProvider, type HotItem, type Provider, ApiError } from "../lib/api"
 import { cn } from "../lib/utils"
 import { Flame } from "lucide-react"
 
@@ -20,8 +20,7 @@ interface TimelineItem {
  * TimelineHotList 组件属性
  */
 interface TimelineHotListProps {
-  /** 当前选中的供应商标题 */
-  providerTitle: string
+  provider: Provider
   /** 返回供应商列表的回调 */
   onBack: () => void
 }
@@ -58,7 +57,7 @@ function formatHot(hot: number): string {
  * - 右侧新闻内容（时间、标题、热度）
  * - 底部无限滚动加载
  */
-export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
+export function TimelineHotList({ provider }: TimelineHotListProps) {
   const [items, setItems] = useState<TimelineItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -98,7 +97,7 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
     setError(null)
     
     try {
-      const data = await getHotList(providerTitle)
+      const data = await getHotListByProvider(provider)
       const startIndex = isRefresh ? 0 : items.length
       const newItems = convertToTimelineItems(data, startIndex)
       
@@ -128,7 +127,7 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [providerTitle, items.length, convertToTimelineItems])
+  }, [provider, items.length, convertToTimelineItems])
 
   /**
    * 加载更多数据（模拟）
