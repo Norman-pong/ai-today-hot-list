@@ -3,7 +3,6 @@ import { Header } from "./components/Header"
 import { ProviderGrid } from "./components/ProviderGrid"
 import { TimelineHotList } from "./components/TimelineHotList"
 import { ThemeProvider } from "./contexts/ThemeContext"
-import { useTheme } from "./contexts/ThemeContext"
 import type { Provider } from "./lib/api"
 import { cn } from "./lib/utils"
 
@@ -36,7 +35,6 @@ function updateURL(provider: string | null) {
 function AppContent() {
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [providers, setProviders] = useState<Provider[]>([])
-  const { isDark } = useTheme()
 
   /**
    * 根据 title 查找 provider
@@ -100,8 +98,7 @@ function AppContent() {
   return (
     <div
       className={cn(
-        "flex h-screen flex-col transition-colors duration-300",
-        isDark ? "bg-slate-950" : "bg-gray-50"
+        "flex h-screen flex-col bg-background text-foreground transition-colors duration-300"
       )}
     >
       {/* 全局导航栏 - 根据页面状态切换模式 */}

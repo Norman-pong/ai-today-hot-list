@@ -53,14 +53,11 @@ export function Header({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b safe-area-top",
-        isDark
-          ? "border-slate-800 bg-slate-950"
-          : "border-gray-200 bg-white",
+        "sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top shadow-sm shadow-black/5 dark:shadow-black/20",
         className
       )}
     >
-      <div className="flex h-14 items-center justify-between px-4">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
         {/* 左侧：返回按钮 + 标题 */}
         <div className="flex items-center gap-3">
           {isDetail && onBack && (
@@ -69,10 +66,7 @@ export function Header({
               size="icon"
               onClick={onBack}
               className={cn(
-                "h-9 w-9",
-                isDark
-                  ? "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                "h-9 w-9 text-muted-foreground hover:text-foreground"
               )}
             >
               <ArrowLeft className="h-5 w-5" />
@@ -82,10 +76,7 @@ export function Header({
           {isDetail ? (
             // 详情页标题
             <h1
-              className={cn(
-                "text-lg font-semibold",
-                isDark ? "text-white" : "text-gray-900"
-              )}
+              className="text-lg font-semibold text-foreground"
             >
               {title}
             </h1>
@@ -94,17 +85,13 @@ export function Header({
             <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-lg",
-                  isDark ? "bg-blue-600" : "bg-blue-500"
+                  "flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/65 ring-1 ring-primary/25 shadow-sm"
                 )}
               >
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <h1
-                className={cn(
-                  "text-lg font-bold",
-                  isDark ? "text-white" : "text-gray-900"
-                )}
+                className="font-display text-[18px] font-semibold tracking-wide text-foreground"
               >
                 今日热榜
               </h1>
@@ -120,10 +107,7 @@ export function Header({
             size="icon"
             onClick={toggleTheme}
             className={cn(
-              "h-9 w-9",
-              isDark
-                ? "text-slate-400 hover:bg-slate-800 hover:text-white"
-                : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              "h-9 w-9 text-muted-foreground hover:text-foreground"
             )}
             title={isDark ? "切换到浅色主题" : "切换到深色主题"}
           >
@@ -142,10 +126,7 @@ export function Header({
               onClick={onRefresh}
               disabled={refreshing}
               className={cn(
-                "h-9 w-9",
-                isDark
-                  ? "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                "h-9 w-9 text-muted-foreground hover:text-foreground"
               )}
             >
               <RefreshCw

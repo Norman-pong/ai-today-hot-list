@@ -1,51 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=ZCOOL+XiaoWei&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --font-sans: "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-display: "ZCOOL XiaoWei", ui-serif, Georgia, serif;
+
+    --background: 220 20% 98%;
+    --foreground: 222 32% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 32% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --popover-foreground: 222 32% 10%;
+    --primary: 206 92% 55%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 222 28% 14%;
+    --muted: 220 16% 94%;
+    --muted-foreground: 222 12% 42%;
+    --accent: 210 90% 96%;
+    --accent-foreground: 210 70% 22%;
+    --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 206 92% 55%;
+    --radius: 0.9rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 222 34% 6%;
+    --foreground: 210 28% 96%;
+    --card: 222 28% 10%;
+    --card-foreground: 210 28% 96%;
+    --popover: 222 28% 10%;
+    --popover-foreground: 210 28% 96%;
+    --primary: 198 92% 58%;
+    --primary-foreground: 222 34% 6%;
+    --secondary: 222 20% 14%;
+    --secondary-foreground: 210 28% 96%;
+    --muted: 222 20% 14%;
+    --muted-foreground: 215 16% 70%;
+    --accent: 222 20% 14%;
+    --accent-foreground: 210 28% 96%;
+    --destructive: 0 70% 40%;
+    --destructive-foreground: 210 28% 96%;
+    --border: 222 18% 18%;
+    --input: 222 18% 18%;
+    --ring: 198 92% 58%;
   }
 }
 
@@ -53,11 +58,21 @@
   * {
     @apply border-border;
   }
+  html {
+    font-family: var(--font-sans);
+    text-rendering: geometricPrecision;
+  }
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-image:
+      radial-gradient(1000px circle at 10% -10%, hsl(var(--primary) / 0.14), transparent 60%),
+      radial-gradient(900px circle at 110% 10%, hsl(280 90% 60% / 0.10), transparent 55%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
   }
 }
 
@@ -95,7 +110,12 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--border)) 50%,
+    hsl(var(--muted)) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
