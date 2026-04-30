@@ -86,6 +86,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     return () => window.removeEventListener("storage", handleStorage)
   }, [])
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark)
+    document.documentElement.style.colorScheme = isDark ? "dark" : "light"
+  }, [isDark])
+
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme, setTheme }}>
       {children}

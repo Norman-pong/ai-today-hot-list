@@ -17,20 +17,20 @@ interface CorsHelpProps {
 export function CorsHelp({ onRetry }: CorsHelpProps) {
   return (
     <div className="p-4">
-      <Card className="border-orange-200 bg-orange-50">
+      <Card className="border-orange-200 bg-orange-50 dark:border-orange-900/50 dark:bg-orange-950/30">
         <CardHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
-            <CardTitle className="text-orange-800">跨域访问受限</CardTitle>
+            <CardTitle className="text-orange-900 dark:text-orange-200">跨域访问受限</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-orange-700">
+          <p className="text-sm text-orange-800/90 dark:text-orange-200/90">
             由于浏览器的安全策略，无法直接访问 API。请尝试以下解决方案：
           </p>
 
           {/* 方案一：浏览器插件 */}
-          <div className="rounded-lg bg-white p-4 shadow-sm">
+          <div className="rounded-lg bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <Chrome className="h-4 w-4 text-blue-600" />
               <h3 className="font-medium text-foreground">方案一：安装 CORS 插件</h3>
@@ -65,7 +65,7 @@ export function CorsHelp({ onRetry }: CorsHelpProps) {
           </div>
 
           {/* 方案二：代理服务器 */}
-          <div className="rounded-lg bg-white p-4 shadow-sm">
+          <div className="rounded-lg bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <Globe className="h-4 w-4 text-green-600" />
               <h3 className="font-medium text-foreground">方案二：使用代理服务器</h3>
@@ -73,7 +73,7 @@ export function CorsHelp({ onRetry }: CorsHelpProps) {
             <p className="text-xs text-muted-foreground mb-3">
               在 vite.config.ts 中配置代理（开发环境）：
             </p>
-            <pre className="overflow-x-auto rounded bg-gray-100 p-2 text-xs text-gray-700">
+            <pre className="overflow-x-auto rounded bg-muted p-2 text-xs text-foreground/80">
 {`server: {
   proxy: {
     '/api': {

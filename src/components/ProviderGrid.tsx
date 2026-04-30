@@ -4,7 +4,6 @@ import { Card, CardContent } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 import { Toast } from "./ui/toast"
 import { cn } from "../lib/utils"
-import { useTheme } from "../contexts/ThemeContext"
 
 /**
  * ProviderGrid 组件属性
@@ -64,7 +63,6 @@ export function ProviderGrid({
   onSelectProvider,
   onProvidersLoaded,
 }: ProviderGridProps) {
-  const { isDark } = useTheme()
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -108,17 +106,11 @@ export function ProviderGrid({
   // 加载状态：显示骨架屏
   if (loading) {
     return (
-      <div className="p-4">
-        <Skeleton className={cn(
-          "mb-4 h-8 w-32",
-          isDark ? "bg-slate-800" : "bg-gray-200"
-        )} />
+      <div className="mx-auto w-full max-w-6xl p-4">
+        <Skeleton className="mb-4 h-8 w-32 bg-muted" />
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
           {Array.from({ length: 12 }).map((_, i) => (
-            <Skeleton key={i} className={cn(
-              "h-24 w-full rounded-xl",
-              isDark ? "bg-slate-800" : "bg-gray-200"
-            )} />
+            <Skeleton key={i} className="h-24 w-full rounded-xl bg-muted" />
           ))}
         </div>
       </div>
@@ -126,14 +118,12 @@ export function ProviderGrid({
   }
 
   return (
-    <div className="p-4">
+    <div className="mx-auto w-full max-w-6xl p-4">
       {/* 标题 */}
-      <h2 className={cn(
-        "mb-4 text-lg font-semibold",
-        isDark ? "text-white" : "text-gray-900"
-      )}>
-        选择平台
-      </h2>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-foreground">选择平台</h2>
+        <p className="mt-1 text-xs text-muted-foreground">点选一个来源，进入对应热榜时间线</p>
+      </div>
 
       {/* 供应商网格 */}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
@@ -141,11 +131,8 @@ export function ProviderGrid({
           <Card
             key={provider.title}
             className={cn(
-              "cursor-pointer transition-all duration-200 touch-manipulation",
-              "hover:shadow-md active:scale-95",
-              isDark
-                ? "bg-slate-900 border-slate-800 hover:border-slate-700"
-                : "bg-white border-gray-200 hover:border-gray-300"
+              "cursor-pointer border-border/60 bg-card/70 shadow-sm backdrop-blur transition-all duration-200 touch-manipulation",
+              "hover:border-border hover:bg-card hover:shadow-md active:scale-95"
             )}
             onClick={() => onSelectProvider(provider)}
           >
@@ -153,10 +140,7 @@ export function ProviderGrid({
               <span className="mb-2 text-3xl" role="img" aria-label={provider.name}>
                 {getProviderIcon(provider)}
               </span>
-              <span className={cn(
-                "text-center text-xs font-medium line-clamp-2",
-                isDark ? "text-slate-200" : "text-gray-900"
-              )}>
+              <span className="text-center text-xs font-medium text-foreground/90 line-clamp-2">
                 {provider.name}
               </span>
             </CardContent>

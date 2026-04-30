@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "preact/hooks"
 import { getHotList, type HotItem, ApiError } from "../lib/api"
 import { cn } from "../lib/utils"
 import { Flame } from "lucide-react"
-import { useTheme } from "../contexts/ThemeContext"
 
 /**
  * 时间线热榜项
@@ -60,8 +59,6 @@ function formatHot(hot: number): string {
  * - 底部无限滚动加载
  */
 export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
-  const { isDark } = useTheme()
-  
   const [items, setItems] = useState<TimelineItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -196,23 +193,20 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
   // 加载状态 - 骨架屏
   if (loading && items.length === 0) {
     return (
-      <div className={cn(
-        "flex h-full flex-col",
-        isDark ? "bg-slate-950" : "bg-white"
-      )}>
+      <div className="flex h-full flex-col bg-background">
         {/* 时间线骨架 */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className={cn("h-3 w-3 animate-pulse rounded-full", isDark ? "bg-slate-800" : "bg-gray-200")} />
-                  <div className={cn("mt-2 h-16 w-0.5 animate-pulse", isDark ? "bg-slate-800" : "bg-gray-200")} />
+                  <div className="h-3 w-3 animate-pulse rounded-full bg-muted" />
+                  <div className="mt-2 h-16 w-0.5 animate-pulse bg-muted" />
                 </div>
                 <div className="flex-1 pb-6">
-                  <div className={cn("h-4 w-12 animate-pulse rounded", isDark ? "bg-slate-800" : "bg-gray-200")} />
-                  <div className={cn("mt-2 h-5 w-full animate-pulse rounded", isDark ? "bg-slate-800" : "bg-gray-200")} />
-                  <div className={cn("mt-2 h-4 w-24 animate-pulse rounded", isDark ? "bg-slate-800" : "bg-gray-200")} />
+                  <div className="h-4 w-12 animate-pulse rounded bg-muted" />
+                  <div className="mt-2 h-5 w-full animate-pulse rounded bg-muted" />
+                  <div className="mt-2 h-4 w-24 animate-pulse rounded bg-muted" />
                 </div>
               </div>
             ))}
@@ -223,70 +217,51 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
   }
 
   return (
-    <div className={cn(
-      "flex h-full flex-col",
-      isDark ? "bg-slate-950" : "bg-white"
-    )}>
+    <div className="flex h-full flex-col bg-background">
       {/* 可滚动内容区域 */}
       <div
         ref={containerRef}
         className="flex-1 overflow-y-auto scrollbar-hide"
       >
         {/* 时间线列表 */}
-        <div className="relative p-4">
+        <div className="relative mx-auto w-full max-w-3xl p-4">
           {/* 垂直时间线 */}
-          <div className={cn(
-            "absolute left-[21px] top-4 bottom-4 w-0.5",
-            isDark ? "bg-slate-800" : "bg-gray-200"
-          )} />
+          <div className="absolute bottom-4 left-[21px] top-4 w-0.5 bg-border" />
           
           <div className="space-y-0">
             {items.map((item, index) => (
               <div
                 key={item.id}
-                className="relative flex gap-4 pb-6 cursor-pointer group"
+                className="group relative flex cursor-pointer gap-4 rounded-xl pb-6 transition-colors hover:bg-accent/40"
                 onClick={() => openLink(item)}
               >
                 {/* 时间线圆点 */}
                 <div className="relative z-10 flex flex-col items-center">
                   <div 
                     className={cn(
-                      "h-3 w-3 rounded-full border-2 transition-colors",
+                      "mt-1 h-3 w-3 rounded-full border-2 transition-colors",
                       index === 0 
-                        ? "bg-blue-500 border-blue-500" 
-                        : isDark
-                          ? "bg-slate-950 border-slate-600 group-hover:border-blue-400"
-                          : "bg-white border-gray-400 group-hover:border-blue-500"
+                        ? "border-primary bg-primary" 
+                        : "border-border bg-background group-hover:border-primary/70"
                     )} 
                   />
                 </div>
 
                 {/* 内容区域 */}
-                <div className="flex-1 pt-0">
+                <div className="flex-1 pb-2 pt-0">
                   {/* 时间 */}
-                  <span className={cn(
-                    "text-xs font-medium",
-                    isDark ? "text-slate-500" : "text-gray-400"
-                  )}>
+                  <span className="text-xs font-medium text-muted-foreground">
                     {item.time}
                   </span>
                   
                   {/* 标题 */}
-                  <h3 className={cn(
-                    "mt-1 text-[15px] font-medium leading-snug transition-colors line-clamp-2",
-                    isDark 
-                      ? "text-slate-100 group-hover:text-blue-400" 
-                      : "text-gray-900 group-hover:text-blue-600"
-                  )}>
+                  <h3 className="mt-1 text-[15px] font-medium leading-snug text-foreground transition-colors line-clamp-2 group-hover:text-primary">
                     {item.title}
                   </h3>
                   
                   {/* 描述 */}
                   {item.desc && item.desc !== item.title && (
-                    <p className={cn(
-                      "mt-1.5 text-[13px] leading-relaxed line-clamp-2",
-                      isDark ? "text-slate-400" : "text-gray-500"
-                    )}>
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground line-clamp-2">
                       {item.desc}
                     </p>
                   )}
@@ -307,22 +282,16 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
         {/* 加载更多触发器 */}
         <div ref={loadMoreRef} className="py-4">
           {loadingMore && (
-            <div className={cn(
-              "flex items-center justify-center gap-2 text-sm",
-              isDark ? "text-slate-500" : "text-gray-400"
-            )}>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <div className={cn(
                 "h-4 w-4 animate-spin rounded-full border-2",
-                isDark ? "border-slate-600 border-t-blue-500" : "border-gray-300 border-t-blue-500"
+                "border-border border-t-primary"
               )} />
               <span>加载中...</span>
             </div>
           )}
           {!hasMore && items.length > 0 && (
-            <div className={cn(
-              "text-center text-xs",
-              isDark ? "text-slate-600" : "text-gray-400"
-            )}>
+            <div className="text-center text-xs text-muted-foreground">
               已经到底了
             </div>
           )}
@@ -331,22 +300,11 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
 
       {/* 错误提示 */}
       {error && (
-        <div className={cn(
-          "absolute inset-x-4 bottom-4 rounded-lg border p-3",
-          isDark 
-            ? "bg-red-500/10 border-red-500/20" 
-            : "bg-red-50 border-red-200"
-        )}>
-          <p className={cn(
-            "text-sm",
-            isDark ? "text-red-400" : "text-red-600"
-          )}>{error}</p>
+        <div className="absolute inset-x-4 bottom-4 rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-destructive">
+          <p className="text-sm">{error}</p>
           <button 
             onClick={() => loadHotList(true)}
-            className={cn(
-              "mt-2 text-xs underline",
-              isDark ? "text-red-400" : "text-red-600"
-            )}
+            className="mt-2 text-xs underline"
           >
             重试
           </button>
