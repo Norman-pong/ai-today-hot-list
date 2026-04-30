@@ -1,7 +1,7 @@
 // API 基础配置
 const API_BASE_URL = "https://apis.uctb.cn/api/dailyhot"
 const HN_API_BASE_URL = "https://hacker-news.firebaseio.com/v0"
-const REDDIT_WORLDNEWS_URL = "https://www.reddit.com/r/worldnews/hot.json"
+const REDDIT_BASE_URL = "https://www.reddit.com"
 
 export type DataRegion = "cn" | "global"
 export type DataSource = "dailyhot" | "hackernews" | "reddit"
@@ -12,6 +12,7 @@ export interface Provider {
   name: string
   region: DataRegion
   source: DataSource
+  sourceKey?: string
   icon?: string
 }
 
@@ -85,17 +86,59 @@ export async function getProvidersByRegion(region: DataRegion): Promise<Provider
   if (region === "global") {
     return [
       {
-        title: "Hacker News",
-        name: "Hacker News",
+        title: "HN Top",
+        name: "HN Top",
         region: "global",
         source: "hackernews",
+        sourceKey: "top",
         icon: "🟧",
       },
       {
-        title: "Reddit /r/worldnews",
-        name: "Reddit",
+        title: "HN Best",
+        name: "HN Best",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "best",
+        icon: "🟧",
+      },
+      {
+        title: "HN New",
+        name: "HN New",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "new",
+        icon: "🟧",
+      },
+      {
+        title: "HN Show",
+        name: "HN Show",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "show",
+        icon: "🟧",
+      },
+      {
+        title: "Reddit Technology",
+        name: "Reddit Technology",
         region: "global",
         source: "reddit",
+        sourceKey: "technology",
+        icon: "👽",
+      },
+      {
+        title: "Reddit Programming",
+        name: "Reddit Programming",
+        region: "global",
+        source: "reddit",
+        sourceKey: "programming",
+        icon: "👽",
+      },
+      {
+        title: "Reddit Science",
+        name: "Reddit Science",
+        region: "global",
+        source: "reddit",
+        sourceKey: "science",
         icon: "👽",
       },
     ]
@@ -162,7 +205,15 @@ export async function getHotList(title: string): Promise<HotItem[]> {
 export async function getHotListByProvider(provider: Provider): Promise<HotItem[]> {
   try {
     if (provider.source === "hackernews") {
-      const topStoriesRes = await fetch(`${HN_API_BASE_URL}/topstories.json`, {
+      const feed = provider.sourceKey === "best"
+        ? "beststories"
+        : provider.sourceKey === "new"
+          ? "newstories"
+          : provider.sourceKey === "show"
+            ? "showstories"
+            : "topstories"
+
+      const topStoriesRes = await fetch(`${HN_API_BASE_URL}/${feed}.json`, {
         method: "GET",
         headers: { Accept: "application/json" },
       })
@@ -206,7 +257,8 @@ export async function getHotListByProvider(provider: Provider): Promise<HotItem[
     }
 
     if (provider.source === "reddit") {
-      const url = new URL(REDDIT_WORLDNEWS_URL)
+      const subreddit = provider.sourceKey || "worldnews"
+      const url = new URL(`${REDDIT_BASE_URL}/r/${encodeURIComponent(subreddit)}/hot.json`)
       url.searchParams.set("limit", "50")
 
       const response = await fetch(url.toString(), {
@@ -239,7 +291,7 @@ export async function getHotListByProvider(provider: Provider): Promise<HotItem[
       return result.data.children.slice(0, 50).map((c) => {
         const d = c.data
         const permalink = d.permalink ? `https://www.reddit.com${d.permalink}` : undefined
-        const link = d.url_overridden_by_dest || d.url || permalink || "https://www.reddit.com/r/worldnews/"
+        const link = d.url_overridden_by_dest || d.url || permalink || `${REDDIT_BASE_URL}/r/${subreddit}/`
 
         return {
           title: d.title,
