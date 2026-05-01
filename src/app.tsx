@@ -141,7 +141,7 @@ function AppContent() {
           />
         ) : (
           <div className="mx-auto w-full max-w-6xl">
-            <div className="sticky top-14 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className="px-4 py-3">
                 <div className="inline-flex rounded-lg bg-muted p-1">
                   <Button
