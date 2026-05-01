@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "preact/hooks"
-import { getHotList, type HotItem, ApiError } from "../lib/api"
+import { getHotListByProvider, type HotItem, type Provider, ApiError } from "../lib/api"
 import { Card, CardContent } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 import { Toast } from "./ui/toast"
@@ -11,8 +11,7 @@ import { Button } from "./ui/button"
  * HotList 组件属性
  */
 interface HotListProps {
-  /** 当前选中的供应商标题 */
-  providerTitle: string
+  provider: Provider
   /** 返回供应商列表的回调 */
   onBack: () => void
 }
@@ -37,7 +36,7 @@ const rankColors: Record<number, string> = {
  * - 支持下拉刷新手势
  * - 点击热榜项在新标签页打开链接
  */
-export function HotList({ providerTitle, onBack }: HotListProps) {
+export function HotList({ provider, onBack }: HotListProps) {
   const [hotList, setHotList] = useState<HotItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -56,7 +55,7 @@ export function HotList({ providerTitle, onBack }: HotListProps) {
     if (showLoading) setLoading(true)
     setError(null)
     try {
-      const data = await getHotList(providerTitle)
+      const data = await getHotListByProvider(provider)
       setHotList(data)
     } catch (err) {
       if (err instanceof ApiError) {
@@ -67,7 +66,7 @@ export function HotList({ providerTitle, onBack }: HotListProps) {
     } finally {
       if (showLoading) setLoading(false)
     }
-  }, [providerTitle])
+  }, [provider])
 
   // 组件挂载或供应商变化时加载数据
   useEffect(() => {
@@ -193,7 +192,7 @@ export function HotList({ providerTitle, onBack }: HotListProps) {
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <h2 className="flex-1 text-lg font-semibold text-foreground">
-            {providerTitle}热榜
+            {provider.title}热榜
           </h2>
           <Button
             variant="ghost"

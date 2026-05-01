@@ -1,10 +1,18 @@
 // API 基础配置
 const API_BASE_URL = "https://apis.uctb.cn/api/dailyhot"
+const HN_API_BASE_URL = "https://hacker-news.firebaseio.com/v0"
+const REDDIT_BASE_URL = "https://www.reddit.com"
+
+export type DataRegion = "cn" | "global"
+export type DataSource = "dailyhot" | "hackernews" | "reddit"
 
 // 供应商类型定义
 export interface Provider {
   title: string
   name: string
+  region: DataRegion
+  source: DataSource
+  sourceKey?: string
   icon?: string
 }
 
@@ -71,6 +79,71 @@ function isCorsError(error: unknown): boolean {
  * GET https://apis.uctb.cn/api/dailyhot
  */
 export async function getProviders(): Promise<Provider[]> {
+  return getProvidersByRegion("cn")
+}
+
+export async function getProvidersByRegion(region: DataRegion): Promise<Provider[]> {
+  if (region === "global") {
+    return [
+      {
+        title: "HN Top",
+        name: "HN Top",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "top",
+        icon: "🟧",
+      },
+      {
+        title: "HN Best",
+        name: "HN Best",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "best",
+        icon: "🟧",
+      },
+      {
+        title: "HN New",
+        name: "HN New",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "new",
+        icon: "🟧",
+      },
+      {
+        title: "HN Show",
+        name: "HN Show",
+        region: "global",
+        source: "hackernews",
+        sourceKey: "show",
+        icon: "🟧",
+      },
+      {
+        title: "Reddit Technology",
+        name: "Reddit Technology",
+        region: "global",
+        source: "reddit",
+        sourceKey: "technology",
+        icon: "👽",
+      },
+      {
+        title: "Reddit Programming",
+        name: "Reddit Programming",
+        region: "global",
+        source: "reddit",
+        sourceKey: "programming",
+        icon: "👽",
+      },
+      {
+        title: "Reddit Science",
+        name: "Reddit Science",
+        region: "global",
+        source: "reddit",
+        sourceKey: "science",
+        icon: "👽",
+      },
+    ]
+  }
+
   try {
     const response = await fetch(API_BASE_URL, {
       method: "GET",
@@ -93,6 +166,8 @@ export async function getProviders(): Promise<Provider[]> {
     return result.data.platforms.map((name) => ({
       title: name,
       name: name,
+      region: "cn",
+      source: "dailyhot",
     }))
   } catch (error) {
     if (error instanceof ApiError) {
@@ -119,9 +194,117 @@ export async function getProviders(): Promise<Provider[]> {
  * @param title 供应商标题，如 "抖音"
  */
 export async function getHotList(title: string): Promise<HotItem[]> {
+  return getHotListByProvider({
+    title,
+    name: title,
+    region: "cn",
+    source: "dailyhot",
+  })
+}
+
+export async function getHotListByProvider(provider: Provider): Promise<HotItem[]> {
   try {
+    if (provider.source === "hackernews") {
+      const feed = provider.sourceKey === "best"
+        ? "beststories"
+        : provider.sourceKey === "new"
+          ? "newstories"
+          : provider.sourceKey === "show"
+            ? "showstories"
+            : "topstories"
+
+      const topStoriesRes = await fetch(`${HN_API_BASE_URL}/${feed}.json`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      })
+
+      if (!topStoriesRes.ok) {
+        throw new ApiError(`HTTP 错误: ${topStoriesRes.status}`, topStoriesRes.status)
+      }
+
+      const ids: number[] = await topStoriesRes.json()
+      const topIds = ids.slice(0, 50)
+
+      const items = await Promise.all(
+        topIds.map(async (id) => {
+          const itemRes = await fetch(`${HN_API_BASE_URL}/item/${id}.json`, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+          })
+          if (!itemRes.ok) {
+            throw new ApiError(`HTTP 错误: ${itemRes.status}`, itemRes.status)
+          }
+          const data: {
+            id: number
+            title?: string
+            by?: string
+            score?: number
+            url?: string
+          } = await itemRes.json()
+
+          const url = data.url || `https://news.ycombinator.com/item?id=${id}`
+          return {
+            title: data.title || `HN #${id}`,
+            desc: data.by ? `by ${data.by}` : undefined,
+            hot: data.score,
+            url,
+            mobileUrl: url,
+          } satisfies HotItem
+        })
+      )
+
+      return items
+    }
+
+    if (provider.source === "reddit") {
+      const subreddit = provider.sourceKey || "worldnews"
+      const url = new URL(`${REDDIT_BASE_URL}/r/${encodeURIComponent(subreddit)}/hot.json`)
+      url.searchParams.set("limit", "50")
+
+      const response = await fetch(url.toString(), {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new ApiError(`HTTP 错误: ${response.status}`, response.status)
+      }
+
+      const result: {
+        data: {
+          children: Array<{
+            data: {
+              title: string
+              author?: string
+              score?: number
+              ups?: number
+              permalink?: string
+              url_overridden_by_dest?: string
+              url?: string
+            }
+          }>
+        }
+      } = await response.json()
+
+      return result.data.children.slice(0, 50).map((c) => {
+        const d = c.data
+        const permalink = d.permalink ? `https://www.reddit.com${d.permalink}` : undefined
+        const link = d.url_overridden_by_dest || d.url || permalink || `${REDDIT_BASE_URL}/r/${subreddit}/`
+
+        return {
+          title: d.title,
+          desc: d.author ? `u/${d.author}` : undefined,
+          hot: d.score ?? d.ups,
+          url: link,
+          mobileUrl: permalink || link,
+        }
+      })
+    }
+
     const url = new URL(API_BASE_URL)
-    url.searchParams.append("title", title)
+    url.searchParams.append("title", provider.title)
 
     const response = await fetch(url.toString(), {
       method: "GET",

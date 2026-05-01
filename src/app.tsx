@@ -3,8 +3,9 @@ import { Header } from "./components/Header"
 import { ProviderGrid } from "./components/ProviderGrid"
 import { TimelineHotList } from "./components/TimelineHotList"
 import { ThemeProvider } from "./contexts/ThemeContext"
-import type { Provider } from "./lib/api"
+import type { Provider, DataRegion } from "./lib/api"
 import { cn } from "./lib/utils"
+import { Button } from "./components/ui/button"
 
 /**
  * 从 URL 查询参数获取当前 provider
@@ -14,17 +15,25 @@ function getProviderFromURL(): string | null {
   return params.get("provider")
 }
 
+function getRegionFromURL(): DataRegion | null {
+  const params = new URLSearchParams(window.location.search)
+  const region = params.get("region")
+  if (region === "cn" || region === "global") return region
+  return null
+}
+
 /**
  * 更新 URL 查询参数
  */
-function updateURL(provider: string | null) {
+function updateURL(region: DataRegion, provider: string | null) {
   const url = new URL(window.location.href)
+  url.searchParams.set("region", region)
   if (provider) {
     url.searchParams.set("provider", provider)
   } else {
     url.searchParams.delete("provider")
   }
-  window.history.pushState({ provider }, "", url)
+  window.history.pushState({ provider, region }, "", url)
 }
 
 /**
@@ -35,6 +44,7 @@ function updateURL(provider: string | null) {
 function AppContent() {
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [providers, setProviders] = useState<Provider[]>([])
+  const [region, setRegion] = useState<DataRegion>(() => getRegionFromURL() || "cn")
 
   /**
    * 根据 title 查找 provider
@@ -48,22 +58,24 @@ function AppContent() {
    */
   const handleSelectProvider = useCallback((provider: Provider) => {
     setSelectedProvider(provider)
-    updateURL(provider.title)
-  }, [])
+    updateURL(region, provider.title)
+  }, [region])
 
   /**
    * 返回首页并清除 URL 参数
    */
   const handleBack = useCallback(() => {
     setSelectedProvider(null)
-    updateURL(null)
-  }, [])
+    updateURL(region, null)
+  }, [region])
 
   /**
    * 处理浏览器前进/后退
    */
   useEffect(() => {
     const handlePopState = (_event: PopStateEvent) => {
+      const nextRegion = getRegionFromURL() || "cn"
+      setRegion(nextRegion)
       const providerTitle = getProviderFromURL()
       if (providerTitle && providers.length > 0) {
         const provider = findProviderByTitle(providerTitle, providers)
@@ -93,6 +105,12 @@ function AppContent() {
     }
   }, [findProviderByTitle])
 
+  const handleSwitchRegion = useCallback((nextRegion: DataRegion) => {
+    setRegion(nextRegion)
+    setSelectedProvider(null)
+    updateURL(nextRegion, null)
+  }, [])
+
   const isDetail = selectedProvider !== null
 
   return (
@@ -118,14 +136,40 @@ function AppContent() {
       >
         {selectedProvider ? (
           <TimelineHotList
-            providerTitle={selectedProvider.title}
+            provider={selectedProvider}
             onBack={handleBack}
           />
         ) : (
-          <ProviderGrid 
-            onSelectProvider={handleSelectProvider}
-            onProvidersLoaded={handleProvidersLoaded}
-          />
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="px-4 py-3">
+                <div className="inline-flex rounded-lg bg-muted p-1">
+                  <Button
+                    variant={region === "cn" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => handleSwitchRegion("cn")}
+                    className="min-h-9 min-w-0 px-4"
+                  >
+                    国内
+                  </Button>
+                  <Button
+                    variant={region === "global" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => handleSwitchRegion("global")}
+                    className="min-h-9 min-w-0 px-4"
+                  >
+                    国外
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <ProviderGrid
+              region={region}
+              onSelectProvider={handleSelectProvider}
+              onProvidersLoaded={handleProvidersLoaded}
+            />
+          </div>
         )}
       </main>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "preact/hooks"
-import { getHotList, type HotItem, ApiError } from "../lib/api"
+import { getHotListByProvider, type HotItem, type Provider, ApiError } from "../lib/api"
 import { cn } from "../lib/utils"
 import { Flame } from "lucide-react"
 
@@ -20,8 +20,7 @@ interface TimelineItem {
  * TimelineHotList 组件属性
  */
 interface TimelineHotListProps {
-  /** 当前选中的供应商标题 */
-  providerTitle: string
+  provider: Provider
   /** 返回供应商列表的回调 */
   onBack: () => void
 }
@@ -58,7 +57,7 @@ function formatHot(hot: number): string {
  * - 右侧新闻内容（时间、标题、热度）
  * - 底部无限滚动加载
  */
-export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
+export function TimelineHotList({ provider }: TimelineHotListProps) {
   const [items, setItems] = useState<TimelineItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -68,6 +67,8 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const loadMoreRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef(1)
+  const allItemsRef = useRef<TimelineItem[]>([])
+  const pageSize = 10
 
   /**
    * 将 HotItem 转换为 TimelineItem
@@ -87,38 +88,23 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
   /**
    * 加载热榜数据
    */
-  const loadHotList = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setLoading(true)
-      pageRef.current = 1
-      setHasMore(true)
-    } else {
-      setLoadingMore(true)
-    }
+  const loadHotList = useCallback(async () => {
+    setLoading(true)
+    pageRef.current = 1
+    setHasMore(true)
     setError(null)
     
     try {
-      const data = await getHotList(providerTitle)
-      const startIndex = isRefresh ? 0 : items.length
-      const newItems = convertToTimelineItems(data, startIndex)
-      
-      if (isRefresh) {
-        setItems(newItems)
-      } else {
-        // 模拟分页：只取部分数据
-        const pageSize = 10
-        const start = (pageRef.current - 1) * pageSize
-        const end = start + pageSize
-        const pageItems = newItems.slice(start, end)
-        
-        if (pageItems.length === 0) {
-          setHasMore(false)
-        } else {
-          setItems(prev => [...prev, ...pageItems])
-          pageRef.current += 1
-        }
-      }
+      const data = await getHotListByProvider(provider)
+      const allItems = convertToTimelineItems(data, 0)
+      allItemsRef.current = allItems
+      setItems(allItems.slice(0, pageSize))
+      setHasMore(allItems.length > pageSize)
+      pageRef.current = 2
     } catch (err) {
+      allItemsRef.current = []
+      setItems([])
+      setHasMore(false)
       if (err instanceof ApiError) {
         setError(err.message)
       } else {
@@ -126,40 +112,33 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
       }
     } finally {
       setLoading(false)
-      setLoadingMore(false)
     }
-  }, [providerTitle, items.length, convertToTimelineItems])
+  }, [provider, convertToTimelineItems])
 
   /**
    * 加载更多数据（模拟）
    */
   const loadMore = useCallback(() => {
-    if (loadingMore || !hasMore) return
-    
-    // 模拟生成更多数据
+    if (loadingMore || !hasMore || error) return
     setLoadingMore(true)
-    setTimeout(() => {
-      const newItems: TimelineItem[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `mock-${Date.now()}-${i}`,
-        time: generateTime(items.length + i),
-        title: `热点新闻 ${items.length + i + 1}：这是一条模拟的热点新闻标题，用于展示无限滚动加载效果`,
-        hot: Math.floor(Math.random() * 80000) + 10000,
-        url: "#",
-      }))
-      
-      setItems(prev => [...prev, ...newItems])
+    const start = (pageRef.current - 1) * pageSize
+    const end = start + pageSize
+    const nextItems = allItemsRef.current.slice(start, end)
+
+    if (nextItems.length === 0) {
+      setHasMore(false)
       setLoadingMore(false)
-      
-      // 最多加载 100 条
-      if (items.length >= 100) {
-        setHasMore(false)
-      }
-    }, 800)
-  }, [items.length, loadingMore, hasMore])
+      return
+    }
+
+    setItems((prev) => [...prev, ...nextItems])
+    pageRef.current += 1
+    setLoadingMore(false)
+  }, [loadingMore, hasMore, error])
 
   // 初始加载
   useEffect(() => {
-    loadHotList(true)
+    loadHotList()
   }, [loadHotList])
 
   // 无限滚动：Intersection Observer
@@ -303,7 +282,7 @@ export function TimelineHotList({ providerTitle }: TimelineHotListProps) {
         <div className="absolute inset-x-4 bottom-4 rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-destructive">
           <p className="text-sm">{error}</p>
           <button 
-            onClick={() => loadHotList(true)}
+            onClick={() => loadHotList()}
             className="mt-2 text-xs underline"
           >
             重试
