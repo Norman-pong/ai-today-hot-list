@@ -22,6 +22,13 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true, // 允许局域网访问，方便手机测试
+    proxy: {
+      "/dailyhotapi": {
+        target: "http://localhost:6688",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/dailyhotapi/, ""),
+      },
+    },
     // 跨域代理配置（可选）
     // proxy: {
     //   '/api': {
